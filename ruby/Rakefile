@@ -1,0 +1,25 @@
+require 'rake/testtask'
+
+file 'lib/lich.rb' => 'lib/lich.rl' do
+  sh 'ragel -R lib/lich.rl'
+end
+task :compile => 'lib/lich.rb'
+
+task :run => 'lib/lich.rb' do
+  ruby 'lib/lich.rb'
+end
+
+file 'lib/lich.dot' => 'lib/lich.rl' do |t|
+  sh "ragel -V lib/lich.rl > #{t.name}"
+end
+file 'lib/lich.png' => 'lib/lich.dot' do |t|
+  sh "dot -Tpng lib/lich.dot > #{t.name}"
+end
+task :dot => 'lib/lich.png'
+
+Rake::TestTask.new do |t|
+  t.libs << 'test'
+  t.test_files = FileList['test/test_*.rb']
+  t.verbose = true
+end
+task :test => :compile
